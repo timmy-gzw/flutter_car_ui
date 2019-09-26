@@ -204,25 +204,53 @@ class CustomBottomSheet extends StatefulWidget {
   _CustomBottomSheetState createState() => _CustomBottomSheetState();
 }
 
-class _CustomBottomSheetState extends State<CustomBottomSheet> {
+class _CustomBottomSheetState extends State<CustomBottomSheet>
+    with SingleTickerProviderStateMixin {
   double sheetTop = 400;
   double minSheetTop = 30;
 
-  bool isExpanded = false;
+  Animation<double> animation;
+
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 200), vsync: this);
+
+    animation =
+        Tween<double>(begin: sheetTop, end: minSheetTop).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: Curves.easeInOut,
+            reverseCurve: Curves.easeInOut,
+          )
+        )
+          ..addListener(() {
+            setState(() {});
+          });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: sheetTop,
+      top: animation.value,
       left: 0,
       child: GestureDetector(
         onTap: () {
-          setState(
-            () {
-              isExpanded ? sheetTop = 400 : sheetTop = minSheetTop;
-              isExpanded = !isExpanded;
-            },
-          );
+          _controller.isCompleted
+              ? _controller.reverse()
+              : _controller.forward();
+        },
+        onVerticalDragEnd: (DragEndDetails dragEndDetails){
+          if (dragEndDetails.primaryVelocity < 0.0) {
+            _controller.forward();
+          } else if (dragEndDetails.primaryVelocity > 0.0)  {
+            _controller.reverse();
+          }else {
+            return;
+          }
         },
         child: SheetContainer(),
       ),
