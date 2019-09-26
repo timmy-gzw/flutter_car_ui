@@ -224,7 +224,205 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             },
           );
         },
-        child: sheetContainer(),
+        child: SheetContainer(),
+      ),
+    );
+  }
+}
+
+class SheetContainer extends StatelessWidget {
+  double sheetItemHeight = 110;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(top: 35),
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(40),
+        ),
+        color: Color(0xFFF1F1F1),
+      ),
+      child: Column(
+        children: <Widget>[
+          drawerHandler(),
+          Expanded(
+            flex: 1,
+            child: ListView(
+              children: <Widget>[
+                offerDetails(sheetItemHeight),
+                specifications(sheetItemHeight),
+                features(sheetItemHeight),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  drawerHandler() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 25),
+      height: 3,
+      width: 65,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Color(0xffd9dbdb),
+      ),
+    );
+  }
+
+  features(double sheetItemHeight) {
+    return Container(
+      padding: EdgeInsets.only(top: 15, left: 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "Features",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 15),
+            height: sheetItemHeight,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: currentCar.features.length,
+              itemBuilder: (context, index) {
+                return ListItem(
+                    sheetItemHeight: sheetItemHeight,
+                    mapVal: currentCar.features[index]);
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  specifications(double sheetItemHeight) {
+    return Container(
+      padding: EdgeInsets.only(top: 15, left: 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "Specifications",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 15),
+            height: sheetItemHeight,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: currentCar.specifications.length,
+              itemBuilder: (context, index) {
+                return ListItem(
+                    sheetItemHeight: sheetItemHeight,
+                    mapVal: currentCar.specifications[index]);
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  offerDetails(double sheetItemHeight) {
+    return Container(
+      padding: EdgeInsets.only(top: 15, left: 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "Offer Details",
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 15),
+            height: sheetItemHeight,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: currentCar.offerDetails.length,
+              itemBuilder: (context, index) {
+                return ListItem(
+                    sheetItemHeight: sheetItemHeight,
+                    mapVal: currentCar.offerDetails[index]);
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class ListItem extends StatelessWidget {
+  final double sheetItemHeight;
+  final Map mapVal;
+
+  ListItem({this.sheetItemHeight, this.mapVal});
+
+  @override
+  Widget build(BuildContext context) {
+    var innerMap;
+    var isMap;
+
+    if (mapVal.values.elementAt(0) is Map) {
+      innerMap = mapVal.values.elementAt(0);
+      isMap = true;
+    } else {
+      innerMap = mapVal;
+      isMap = false;
+    }
+
+    return Container(
+      margin: EdgeInsets.only(right: 20),
+      width: sheetItemHeight,
+      height: sheetItemHeight,
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          mapVal.keys.elementAt(0),
+          isMap
+              ? Text(
+                  innerMap.keys.elementAt(0),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.black, letterSpacing: 1.2, fontSize: 11),
+                )
+              : Container(),
+          Text(
+            innerMap.values.elementAt(0),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+          )
+        ],
       ),
     );
   }
