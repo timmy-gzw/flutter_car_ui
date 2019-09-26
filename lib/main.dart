@@ -1,102 +1,231 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_car_ui/model/car.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
+
+var currentCar = carList.cars[0];
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
+      home: MainApp(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class MainApp extends StatelessWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: Container(
+          margin: EdgeInsets.only(left: 25),
+          child: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+        ),
+        actions: <Widget>[
+          Container(
+            margin: EdgeInsets.only(right: 25),
+            child: Icon(Icons.favorite),
+          )
+        ],
+      ),
+      backgroundColor: Colors.black,
+      body: LayoutStarts(),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+class LayoutStarts extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        CarDetailsAnimation(),
+        CustomBottomSheet(),
+      ],
+    );
   }
+}
+
+class CarDetailsAnimation extends StatefulWidget {
+  @override
+  _CarDetailsAnimationState createState() => _CarDetailsAnimationState();
+}
+
+class _CarDetailsAnimationState extends State<CarDetailsAnimation> {
+  @override
+  Widget build(BuildContext context) {
+    return CarDetails();
+  }
+}
+
+class CarDetails extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(left: 30),
+            child: _carTitle(),
+          ),
+          Container(
+            width: double.infinity,
+            child: CarCarousel(),
+          )
+        ],
+      ),
+    );
+  }
+
+  _carTitle() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        RichText(
+          text: TextSpan(
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 38,
+            ),
+            children: [
+              TextSpan(text: currentCar.companyName),
+              TextSpan(text: "\n"),
+              TextSpan(
+                text: currentCar.carName,
+                style: TextStyle(fontWeight: FontWeight.w700),
+              )
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        RichText(
+          text: TextSpan(
+            style: TextStyle(fontSize: 16),
+            children: [
+              TextSpan(
+                text: currentCar.price.toString(),
+                style: TextStyle(
+                  color: Colors.grey[20],
+                ),
+              ),
+              TextSpan(
+                text: " / day",
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              )
+            ],
+          ),
+        )
+      ],
+    );
+  }
+}
+
+class CarCarousel extends StatefulWidget {
+  @override
+  _CarCarouselState createState() => _CarCarouselState();
+}
+
+class _CarCarouselState extends State<CarCarousel> {
+  static final List<String> imgList = currentCar.imgList;
+
+  static List<Widget> child = _map<Widget>(imgList, (index, String assetName) {
+    return Container(
+      child: Image.asset(
+        "assets/$assetName",
+        fit: BoxFit.fitWidth,
+      ),
+    );
+  }).toList();
+
+  static List<T> _map<T>(List list, Function handler) {
+    List<T> result = [];
+    for (var i = 0; i < list.length; i++) {
+      result.add(handler(i, list[i]));
+    }
+    return result;
+  }
+
+  int _current = 0;
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+    return Container(
+      child: Column(
+        children: <Widget>[
+          CarouselSlider(
+            height: 250,
+            viewportFraction: 1.0,
+            items: child,
+            onPageChanged: (index) {
+              setState(() {
+                _current = index;
+              });
+            },
+          ),
+          Container(
+            margin: EdgeInsets.only(left: 25),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: _map(imgList, (index, assetName) {
+                return Container(
+                  width: 50,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    color:
+                        _current == index ? Colors.grey[100] : Colors.grey[600],
+                  ),
+                );
+              }),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
-        ),
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class CustomBottomSheet extends StatefulWidget {
+  @override
+  _CustomBottomSheetState createState() => _CustomBottomSheetState();
+}
+
+class _CustomBottomSheetState extends State<CustomBottomSheet> {
+  double sheetTop = 400;
+  double minSheetTop = 30;
+
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: sheetTop,
+      left: 0,
+      child: GestureDetector(
+        onTap: () {
+          setState(
+            () {
+              isExpanded ? sheetTop = 400 : sheetTop = minSheetTop;
+              isExpanded = !isExpanded;
+            },
+          );
+        },
+        child: sheetContainer(),
+      ),
     );
   }
 }
