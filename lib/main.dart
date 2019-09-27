@@ -1,5 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_car_ui/bloc/state_bloc.dart';
+import 'package:flutter_car_ui/bloc/state_provider.dart';
 import 'package:flutter_car_ui/model/car.dart';
 
 void main() {
@@ -61,10 +63,55 @@ class CarDetailsAnimation extends StatefulWidget {
   _CarDetailsAnimationState createState() => _CarDetailsAnimationState();
 }
 
-class _CarDetailsAnimationState extends State<CarDetailsAnimation> {
+class _CarDetailsAnimationState extends State<CarDetailsAnimation>
+    with TickerProviderStateMixin {
+  AnimationController fadeController;
+  AnimationController scaleController;
+
+  Animation fadeAnimation;
+  Animation scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    fadeController =
+        AnimationController(duration: Duration(milliseconds: 180), vsync: this);
+    scaleController =
+        AnimationController(duration: Duration(milliseconds: 350), vsync: this);
+
+    fadeAnimation = Tween(begin: 0.0, end: 1.0).animate(fadeController);
+    scaleAnimation = Tween(begin: 0.8, end: 1.0).animate(CurvedAnimation(
+        parent: scaleController,
+        curve: Curves.easeInOut,
+        reverseCurve: Curves.easeInOut));
+  }
+
+  forward() {
+    fadeController.forward();
+    scaleController.forward();
+  }
+
+  reverse() {
+    fadeController.reverse();
+    scaleController.reverse();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CarDetails();
+    return StreamBuilder<Object>(
+        initialData: StateProvider().isAnimating,
+        stream: stateBloc.animationStatus,
+        builder: (context, snapshot) {
+          snapshot.data ? forward() : reverse();
+          return ScaleTransition(
+            scale: scaleAnimation,
+            child: FadeTransition(
+              opacity: fadeAnimation,
+              child: CarDetails(),
+            ),
+          );
+        });
   }
 }
 
@@ -210,8 +257,17 @@ class _CustomBottomSheetState extends State<CustomBottomSheet>
   double minSheetTop = 30;
 
   Animation<double> animation;
-
   AnimationController _controller;
+
+  forwardAnimation() {
+    _controller.forward();
+    stateBloc.toggleAnimation();
+  }
+
+  reverseAnimation() {
+    _controller.reverse();
+    stateBloc.toggleAnimation();
+  }
 
   @override
   void initState() {
@@ -219,14 +275,12 @@ class _CustomBottomSheetState extends State<CustomBottomSheet>
     _controller = AnimationController(
         duration: const Duration(milliseconds: 200), vsync: this);
 
-    animation =
-        Tween<double>(begin: sheetTop, end: minSheetTop).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: Curves.easeInOut,
-            reverseCurve: Curves.easeInOut,
-          )
-        )
+    animation = Tween<double>(begin: sheetTop, end: minSheetTop)
+        .animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+      reverseCurve: Curves.easeInOut,
+    ))
           ..addListener(() {
             setState(() {});
           });
@@ -239,16 +293,14 @@ class _CustomBottomSheetState extends State<CustomBottomSheet>
       left: 0,
       child: GestureDetector(
         onTap: () {
-          _controller.isCompleted
-              ? _controller.reverse()
-              : _controller.forward();
+          _controller.isCompleted ? reverseAnimation() : forwardAnimation();
         },
-        onVerticalDragEnd: (DragEndDetails dragEndDetails){
+        onVerticalDragEnd: (DragEndDetails dragEndDetails) {
           if (dragEndDetails.primaryVelocity < 0.0) {
-            _controller.forward();
-          } else if (dragEndDetails.primaryVelocity > 0.0)  {
-            _controller.reverse();
-          }else {
+            forwardAnimation();
+          } else if (dragEndDetails.primaryVelocity > 0.0) {
+            reverseAnimation();
+          } else {
             return;
           }
         },
